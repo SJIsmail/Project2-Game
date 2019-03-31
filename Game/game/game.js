@@ -18,8 +18,9 @@ var paddleWidth, paddleHeight, paddleDepth, paddleQuality;
 var paddle1DirY = 0, paddle2DirY = 0, paddleSpeed = 3;
 
 // ball variables
-var ball, paddle1, paddle2;
-var ballDirX = 1, ballDirY = 1, ballSpeed = 1;
+var ball, ball2, paddle1, paddle2;
+var ballDirX = 1, ballDirY = 0, ballSpeed = 1;
+var ball2DirX = -0.7, ball2DirY = 0.5, ball2Speed = 1; //change back to 1 when not debugging
 
 // game-related variables
 var score1 = 0, score2 = 0;
@@ -141,6 +142,12 @@ function createScene()
     // // create the sphere's material
     var sphereMaterial =
     new THREE.MeshLambertMaterial({color: 0xD43001});
+	
+	var sphereMaterial2 =
+    new THREE.MeshLambertMaterial({color: 0xFF0000});
+	
+	var boxMaterial =
+    new THREE.MeshLambertMaterial({color: 0x00FFFF});
     
     // Create a ball with sphere geometry
     ball = new THREE.Mesh(new THREE.SphereGeometry(
@@ -148,9 +155,24 @@ function createScene()
         segments,
         rings),
         sphereMaterial);
+		
+	ball2 = new THREE.Mesh(new THREE.SphereGeometry(
+        radius,
+        segments,
+        rings),
+        sphereMaterial2);
+		
+	pickup = new THREE.Mesh(new THREE.BoxGeometry(
+		5,
+		5,
+		5),
+		boxMaterial);
+	
     
     // // add the sphere to the scene
     scene.add(ball);
+	scene.add(ball2);
+	scene.add(pickup);
     
     ball.position.x = 0;
     ball.position.y = 0;
@@ -158,9 +180,17 @@ function createScene()
     ball.position.z = radius;
     ball.receiveShadow = true;
     ball.castShadow = true;
-    
-    
- 
+	
+	ball2.position.x = 100;
+    ball2.position.y = 0;
+    // set ball above the table surface
+    ball2.position.z = radius;
+    ball2.receiveShadow = true;
+    ball2.castShadow = true;
+	
+	pickup.position.x = 50;
+    pickup.position.y = 0;
+	pickup.position.z = 5;
     
     // finally we finish by adding a ground plane
     // to show off pretty shadows
@@ -193,13 +223,20 @@ function createScene()
     // add to the scene
     scene.add(pointLight);
     
-    // add a spot light
+    // add a spot light for player ball
     // this is important for casting shadows
     spotLight = new THREE.SpotLight(0xF8D898);
     spotLight.position.set(0, 0, 460);
-    spotLight.intensity = 1.5;
+    spotLight.intensity = 1.0;
     spotLight.castShadow = true;
     scene.add(spotLight);
+	
+	//add another spot light for enemy ball
+	spotLight2 = new THREE.SpotLight(0xF8D898);
+    spotLight2.position.set(0, 0, 460);
+    spotLight2.intensity = 1.0;
+    spotLight2.castShadow = true;
+    scene.add(spotLight2);
     
     // MAGIC SHADOW CREATOR DELUXE EDITION with Lights PackTM DLC
     renderer.shadowMapEnabled = true;
@@ -209,6 +246,9 @@ function cameraPhysics()
     // we can easily notice shadows if we dynamically move lights during the game
     spotLight.position.x = ball.position.x * 2;
     spotLight.position.y = ball.position.y * 2;
+	
+	spotLight2.position.x = ball2.position.x * 2;
+    spotLight2.position.y = ball2.position.y * 2;
     
     // move to behind the player's paddle
     camera.position.x = 0;
@@ -231,7 +271,7 @@ function ballPhysics()
         ballDirX = -ballDirX;
     }
     
-    // if ball goes off the 'right' side (CPU's side)
+    // if ball goes off the left side (CPU's side)
     if (ball.position.x >= fieldWidth/2)
     {
         ballDirX = -ballDirX;
@@ -246,11 +286,42 @@ function ballPhysics()
     {
         ballDirY = -ballDirY;
     }
-    
+	
+	if (ball2.position.x <= -fieldWidth/2)
+    {
+        ball2DirX = -ball2DirX;
+    }
+    // if ball goes off the left side (CPU's side)
+    if (ball2.position.x >= fieldWidth/2)
+    {
+        ball2DirX = -ball2DirX;
+    }
+    // if ball goes off the top side (side of table)
+    if (ball2.position.y <= -fieldHeight/2)
+    {
+        ball2DirY = -ball2DirY;
+    }
+    // if ball goes off the bottom side (side of table)
+    if (ball2.position.y >= fieldHeight/2)
+    {
+        ball2DirY = -ball2DirY;
+    }
+	
+	// collision variables
+	var ballBB = new THREE.Box3().setFromObject(ball);
+	var ballBB2 = new THREE.Box3().setFromObject(ball2);
+	var collision = ballBB.intersectsBox(ballBB2);
+	if(collision === true)
+	{
+		scene.remove(ball);
+	}
     // update ball position over time
     ball.position.x += ballDirX * ballSpeed;
     ball.position.y += ballDirY * ballSpeed;
-    
+	
+	ball2.position.x += ball2DirX * ball2Speed;
+    ball2.position.y += ball2DirY * ball2Speed;
+
     // limit ball's y-speed to 2x the x-speed
     // this is so the ball doesn't speed from left to right super fast
     // keeps game playable for humans
@@ -262,6 +333,15 @@ function ballPhysics()
     {
         ballDirY = -ballSpeed * 2;
     }
+	
+	if (ball2DirY > ball2Speed * 2)
+    {
+        ball2DirY = ball2Speed * 2;
+    }
+    else if (ball2DirY < -ball2Speed * 2)
+    {
+        ball2DirY = -ball2Speed * 2;
+    }
 }
 
 
@@ -272,8 +352,36 @@ function playerMovement()
     {
         // if paddle is not touching the side of table
         // we move
-        ballDirY -= 0.1;
+        //ballDirY -= 0.3;
+		ballDirX = 1;
+		ballDirY = 0;
         
+    }
+	
+	if (Key.isDown(Key.D))
+    {
+        // if paddle is not touching the side of table
+        // we move
+        //ballDirY += 0.3;
+		ballDirX = -1;
+        ballDirY = 0;
+    }
+	if (Key.isDown(Key.W))
+    {
+        // if paddle is not touching the side of table
+        // we move
+        //ballDirY -= 0.3;
+		ballDirY = -1;
+        ballDirX = 0;
+    }
+	
+	if (Key.isDown(Key.S))
+    {
+        // if paddle is not touching the side of table
+        // we move
+        //ballDirY += 0.3;
+		ballDirY = 1;
+        ballDirX = 0;
     }
     
 }
@@ -282,6 +390,7 @@ function draw()
 {
     // draw THREE.JS scene
     renderer.render(scene, camera);
+	//console.log(ballBB.intersectsBox(ballBB2));
     
     
     // loop the draw() function
@@ -292,4 +401,3 @@ function draw()
     // process game logic
    
 }
-
