@@ -69,7 +69,7 @@ function createScene()
     renderer = new THREE.WebGLRenderer();
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap; // default THREE.PCFShadowMap
-
+/*
     camera =
     new THREE.PerspectiveCamera(
                                 VIEW_ANGLE,
@@ -85,7 +85,23 @@ function createScene()
     // set a default position for the camera
     // not doing this somehow messes up shadow rendering
     camera.position.z = 320;
+/	
+	camera =
+    new THREE.PerspectiveCamera(
+                                50,
+                                ASPECT,
+                                NEAR,
+                                FAR);
+	scene = new THREE.Scene();
     
+    // add the camera to the scene
+    ball.add(camera);
+    
+    // set a default position for the camera
+    // not doing this somehow messes up shadow rendering
+	camera.position.z = 320;
+*/  
+	scene = new THREE.Scene();
     // start the renderer
     renderer.setSize(WIDTH, HEIGHT);
     
@@ -167,6 +183,63 @@ function createScene()
 		5,
 		5),
 		boxMaterial);
+		
+	camera =
+    new THREE.PerspectiveCamera(
+                                50,
+                                ASPECT,
+                                NEAR,
+                                FAR);
+	//scene = new THREE.Scene();
+    
+    // add the camera to the scene
+    ball.add(camera);
+	
+    
+    // set a default position for the camera
+    // not doing this somehow messes up shadow rendering
+	camera.position.z = 320;
+	
+	
+	// instantiate a listener
+	var audioListener = new THREE.AudioListener();
+
+	// add the listener to the camera
+	camera.add( audioListener );
+
+	// instantiate audio object
+	var oceanAmbientSound = new THREE.Audio( audioListener );
+
+	// add the audio object to the scene
+	scene.add( oceanAmbientSound );
+
+	// instantiate a loader
+	var loader = new THREE.AudioLoader();
+
+	// load a resource
+	loader.load(
+	// resource URL
+	'sounds/vim.mp3',
+
+	// onLoad callback
+	function ( audioBuffer ) {
+		// set the audio object buffer to the loaded object
+		oceanAmbientSound.setBuffer( audioBuffer );
+
+		// play the audio
+		oceanAmbientSound.play();
+	},
+
+	// onProgress callback
+	function ( xhr ) {
+		console.log( (xhr.loaded / xhr.total * 100) + '% loaded' );
+	},
+
+	// onError callback
+	function ( err ) {
+		console.log( 'An error happened' );
+	}
+);
 	
     
     // // add the sphere to the scene
@@ -251,14 +324,18 @@ function cameraPhysics()
     spotLight2.position.y = ball2.position.y * 2;
     
     // move to behind the player's paddle
-    camera.position.x = 0;
+    //camera.position.x = 0;
+    //camera.position.y = 125;
+    //camera.position.z = 245;
+	camera.position.x = 0;
     camera.position.y = 125;
-    camera.position.z = 245;
+    camera.position.z = 115;
+	
     //console.log(camera.position.y);
     // rotate to face towards the opponent
-    camera.rotation.x = -0.40;
+    camera.rotation.x = -0.8;
     camera.rotation.y = 0;
-    camera.rotation.z = -3.14224;
+    camera.rotation.z = 3.14224;
     //console.log(ball.position.x);
     // z -1.5707963267948966
    // y -1.0471975511965976
