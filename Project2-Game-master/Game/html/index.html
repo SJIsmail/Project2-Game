@@ -1,0 +1,52 @@
+<!doctype html>
+<html>
+  <head>
+		<title>Snake Game</title>
+		<style>
+			body {
+				background-color: #E5FFCC;
+			}
+			#gameCanvas {
+				background-color:  #E0E0E0;
+				width: 1200px;
+				height: 600px;
+				margin: auto;
+				align: center;
+			}
+			#scoreboard {
+				text-align: center;
+				font-family: Segoe UI, Helvetica, Ubuntu, sans-serif;
+				color: black;
+                font-size:85%;
+			}
+			#scores {
+				font-size:400%;
+				padding:0; 
+				margin:0;
+				color: black;
+			}
+			#title {
+				background-color: white;
+				color: black;
+			}
+		</style>
+	</head>
+	<body onload='setup();'>
+		<div id='gameCanvas'></div>
+		<script src='../lib/three.min.js'></script>
+		<script src='../game/keyboard.js'></script>
+		<script src='../game/game.js'></script>
+		
+		<audio autoplay>
+		<source src="vim.mp3" type="audio/mpeg">
+			Your browser does not support the audio element.
+		</audio> 
+		
+		<div id='scoreboard'>
+			<h1 id='scores'>0</h1>
+			<h1 id='title'>DodgeBall</h1>
+            <h3>{A - D}: Left - Right
+                <br>{W - S}: Up - Down </h3>
+		</div>
+	</body>
+</html>
