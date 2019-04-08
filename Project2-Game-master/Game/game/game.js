@@ -8,7 +8,7 @@
 // SOURCES : http://buildnewgames.com/webgl-threejs/
 
 // scene object variables
-var renderer, scene, camera, pointLight, spotLight;
+var renderer, scene, closeCamera, backCamera, pointLight, spotLight;
 
 // field variables
 var fieldWidth = 400, fieldHeight = 200;
@@ -28,6 +28,7 @@ var ball5DirX = -0.7, ball5DirY = 0.5, ball3Speed = 1; //change back to 1 when n
 
 // game-related variables
 var score = 0, score2 = 0;
+var camCheck = 0;
 // you can change this to any positive whole number
 var maxScore = 7;
 
@@ -65,6 +66,8 @@ function createScene()
     ASPECT = WIDTH / HEIGHT,
     NEAR = 0.1,
     FAR = 10000;
+	
+	scene = new THREE.Scene();
     
     var c = document.getElementById("gameCanvas");
     
@@ -73,39 +76,7 @@ function createScene()
     renderer = new THREE.WebGLRenderer();
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap; // default THREE.PCFShadowMap
-/*
-    camera =
-    new THREE.PerspectiveCamera(
-                                VIEW_ANGLE,
-                                ASPECT,
-                                NEAR,
-                                FAR);
-    
-    scene = new THREE.Scene();
-    
-    // add the camera to the scene
-    scene.add(camera);
-    
-    // set a default position for the camera
-    // not doing this somehow messes up shadow rendering
-    camera.position.z = 320;
-/	
-	camera =
-    new THREE.PerspectiveCamera(
-                                50,
-                                ASPECT,
-                                NEAR,
-                                FAR);
-	scene = new THREE.Scene();
-    
-    // add the camera to the scene
-    ball.add(camera);
-    
-    // set a default position for the camera
-    // not doing this somehow messes up shadow rendering
-	camera.position.z = 320;
-*/  
-	scene = new THREE.Scene();
+
     // start the renderer
     renderer.setSize(WIDTH, HEIGHT);
     
@@ -215,8 +186,23 @@ function createScene()
 		5,
 		5),
 		boxMaterial);
+// ----------------CAMERAS-----------------------
+	closeCamera =
+    new THREE.PerspectiveCamera(
+                                VIEW_ANGLE,
+                                ASPECT,
+                                NEAR,
+                                FAR);
+    
+    // add the camera to the scene
+    scene.add(closeCamera);
+    
+    // set a default position for the camera
+    // not doing this somehow messes up shadow rendering
+    closeCamera.position.z = 320;
+
 		
-	camera =
+	backCamera =
     new THREE.PerspectiveCamera(
                                 50,
                                 ASPECT,
@@ -225,54 +211,12 @@ function createScene()
 	//scene = new THREE.Scene();
     
     // add the camera to the scene
-    ball.add(camera);
+    ball.add(backCamera);
 	
     
     // set a default position for the camera
     // not doing this somehow messes up shadow rendering
-	camera.position.z = 320;
-	
-	
-	// instantiate a listener
-	var audioListener = new THREE.AudioListener();
-
-	// add the listener to the camera
-	camera.add( audioListener );
-
-	// instantiate audio object
-	var oceanAmbientSound = new THREE.Audio( audioListener );
-
-	// add the audio object to the scene
-	scene.add( oceanAmbientSound );
-
-	// instantiate a loader
-	var loader = new THREE.AudioLoader();
-
-	// load a resource
-	loader.load(
-	// resource URL
-	'sounds/vim.mp3',
-
-	// onLoad callback
-	function ( audioBuffer ) {
-		// set the audio object buffer to the loaded object
-		oceanAmbientSound.setBuffer( audioBuffer );
-
-		// play the audio
-		oceanAmbientSound.play();
-	},
-
-	// onProgress callback
-	function ( xhr ) {
-		console.log( (xhr.loaded / xhr.total * 100) + '% loaded' );
-	},
-
-	// onError callback
-	function ( err ) {
-		console.log( 'An error happened' );
-	}
-);
-	
+	backCamera.position.z = 320;
     
     // // add the sphere to the scene
     scene.add(ball);
@@ -387,21 +331,23 @@ function cameraPhysics()
     spotLight2.position.y = ball2.position.y * 2;
     
     // move to behind the player's paddle
-    //camera.position.x = 0;
-    //camera.position.y = 125;
-    //camera.position.z = 245;
-	camera.position.x = 0;
-    camera.position.y = 125;
-    camera.position.z = 115;
+    closeCamera.position.x = 0;
+    closeCamera.position.y = 125;
+    closeCamera.position.z = 245;
+	
+	backCamera.position.x = 0;
+    backCamera.position.y = 100;
+    backCamera.position.z = 75;
 	
     //console.log(camera.position.y);
     // rotate to face towards the opponent
-    camera.rotation.x = -0.8;
-    camera.rotation.y = 0;
-    camera.rotation.z = 3.14224;
-    //console.log(ball.position.x);
-    // z -1.5707963267948966
-   // y -1.0471975511965976
+    closeCamera.rotation.x = -0.4;
+    closeCamera.rotation.y = 0;
+    closeCamera.rotation.z = 3.14224;
+	
+	backCamera.rotation.x = -1;
+    backCamera.rotation.y = 0;
+    backCamera.rotation.z = 3.14224;
 }
 
 function ballPhysics()
@@ -516,6 +462,10 @@ function ballPhysics()
 	{
 		scene.remove(ball);
         document.getElementById("scores").innerHTML = "HighScore: "+score;
+		
+		alert("GAME OVER");
+		document.location.reload();
+		clearInterval(interval);
 	}
     // collision variables
     var ballBB3 = new THREE.Box3().setFromObject(ball3);
@@ -524,6 +474,10 @@ function ballPhysics()
     {
         scene.remove(ball);
         document.getElementById("scores").innerHTML = "HighScore: "+score;
+		
+		alert("GAME OVER");
+		document.location.reload();
+		clearInterval(interval);
     }
     // collision variables
     var ballBB4 = new THREE.Box3().setFromObject(ball4);
@@ -532,6 +486,10 @@ function ballPhysics()
     {
         scene.remove(ball);
         document.getElementById("scores").innerHTML = "HighScore: "+score;
+
+		alert("GAME OVER");
+		document.location.reload();
+		clearInterval(interval);
     }
     // collision variables
     var ballBB5 = new THREE.Box3().setFromObject(ball5);
@@ -540,6 +498,10 @@ function ballPhysics()
     {
         scene.remove(ball);
         document.getElementById("scores").innerHTML = "HighScore: "+score;
+		
+		alert("GAME OVER");
+		document.location.reload();
+		clearInterval(interval);
     }
     
     // collision variables
@@ -640,12 +602,17 @@ function playerMovement()
 function draw()
 {
     // draw THREE.JS scene
-    renderer.render(scene, camera);
-	//console.log(ballBB.intersectsBox(ballBB2));
-    
-    
-    // loop the draw() function
-    requestAnimationFrame(draw);
+	if (Key.isDown(Key.X))
+    {
+		renderer.render(scene, backCamera);	
+    }
+	else
+	{
+		renderer.render(scene, closeCamera);
+	} 
+    // loop the draw() function	
+    requestAnimationFrame(draw);	
+	
     cameraPhysics();
     ballPhysics();
     playerMovement()

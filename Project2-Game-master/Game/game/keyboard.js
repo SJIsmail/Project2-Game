@@ -8,6 +8,7 @@ A: 65,
 W: 87,
 D: 68,
 S: 83,
+X: 88,
 SPACE: 32,
     
 isDown: function(keyCode) {
