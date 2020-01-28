@@ -1,4 +1,4 @@
-# Project2-Game
+# Dodgeball-Game
 Goal: Collect as many squares as possible. Collecting a square adds a new ball with a random trajectory starting from the centre. The speed of the balls also increase by 2%.
 
 Goodluck! 
